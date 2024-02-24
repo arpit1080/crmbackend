@@ -4,6 +4,7 @@ from .models import User
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.models import User
 import json
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
@@ -24,15 +25,9 @@ def delete_user_by_id(request, user_id):
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=400)
 
-# def get_user_by_id(request, user_id):
-#     try:
-#         user = User.objects.get(id=user_id)
-#         serialized_user = UserSerializers(user)  # Assuming you have a serializer for your User model named UserSerializer
-#         return JsonResponse({'success': True, 'user': serialized_user.data})
-#     except User.DoesNotExist:
-#         return JsonResponse({'error': 'User not found'}, status=404)
     
 def get_user_by_id(request, user_id):
+    print(user_id)
     try:
         user = User.objects.get(id=user_id)
         serialized_user = UserSerializers(user)
@@ -49,7 +44,6 @@ def get_all_user(request):
         return JsonResponse({'error': 'User not found'}, status=404)
 
 
-    
 @csrf_exempt
 def update_user_by_id(request, user_id):
     if request.method == 'PUT':
@@ -66,11 +60,7 @@ def update_user_by_id(request, user_id):
         mobile_number = data.get('Mobile_Number', user.Mobile_Number)
         if User.objects.exclude(id=user_id).filter(Mobile_Number=mobile_number).exists():
             return JsonResponse({'error': 'Mobile_Number already exists'}, status=400)
-        
-
-
-
-        
+                        
         # Update the user object based on the data received in the request body
         user.Username = data.get('Username', user.Username)
         user.DOB = data.get('DOB', user.DOB)
@@ -84,35 +74,56 @@ def update_user_by_id(request, user_id):
         return JsonResponse({'success': True, 'message': 'User updated successfully'})
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=400)    
-    
 
+
+from django.contrib.auth import authenticate, login
+from django.shortcuts import render, redirect
+from django.contrib import messages
 @csrf_exempt
-def login(request):
+def login_view(request):
     if request.method == 'POST':
-        data = json.loads(request.body.decode('utf-8'))
-        print("Received data:", data)
+        username = request.POST['username']
+        password = request.POST['password']
 
-        username = data.get('Username', '')
-        password = data.get('Password', '')
-        print("Username and password:", username, password)
-        
-        if username and password:  # Check if username and password are provided
-            try:
-                user = authenticate(request, username=username, password=password)
-                print("Authenticated user:", user)
-                if user:
-                    # Authentication successful
-                    return JsonResponse({'message': 'Login successful'})
-                else:
-                    # Authentication failed
-                    return JsonResponse({'message': 'Invalid credentials'}, status=401)
-            except Exception as e:
-                print('Authentication error:', e)
-                return JsonResponse({'message': 'Internal server error'}, status=500)
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            messages.success(request, 'Login successful!')
+            return redirect('home')  # Replace 'home' with the name of your home view
         else:
-            return JsonResponse({'message': 'Username or password missing'}, status=400)
-    else:
-        return JsonResponse({'message': 'Method not allowed'}, status=405)
+            messages.error(request, 'Invalid username or password.')
+
+    return render(request, 'login.html')
+
+# @csrf_exempt
+# def login(request):
+#     if request.method == 'POST':
+#         data = json.loads(request.body.decode('utf-8'))
+#         print("Received data:", data)
+
+#         username = data.get('Email', '')
+#         password = data.get('Password', '')
+#         print("Username and password:", username,password)
+        
+#         if username and password:  # Check if username and password are provided
+#             try:
+#                 user = authenticate(request, username=username, password=password)
+#                 print("Authenticated user:", user)
+#                 if user:
+#                     # Authentication successful
+#                     return JsonResponse({'message': 'Login successful'})
+#                 else:
+#                     # Authentication failed
+#                     return JsonResponse({'message': 'Invalid credentials'}, status=401)
+#             except Exception as e:
+#                 print('Authentication error:', e)
+#                 print('Authentication failed:', authenticate(request, username=username, password=password))
+#                 return JsonResponse({'message': 'Internal server error'}, status=500)
+#         else:
+#             return JsonResponse({'message': 'Username or password missing'}, status=400)
+#     else:
+#         return JsonResponse({'message': 'Method not allowed'}, status=405)
 
 
 
@@ -134,14 +145,13 @@ def forgot_password(request):
             # Update user's reset password token in database
             user.reset_password_token = token
             user.save()
-
             # Send email with reset password link
-            reset_password_link = f"http:///resetpassword?token={token}"
+            reset_password_link = f"http://127.0.0.1:8000/resetpassword?token={token}"
             message = f"Please click the following link to reset your password: {reset_password_link}"
             send_mail(
                 'Password Reset',
                 message,
-                'dtest6366@example.com',
+                'dtest6366@gmail.com',
                 [email],
                 fail_silently=False,
             )
@@ -206,4 +216,6 @@ def forgot_password(request):
 #         return JsonResponse({'message': 'Method not allowed'}, status=405)
     
 # Define test_database_connection function here
+
+
 

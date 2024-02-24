@@ -24,6 +24,7 @@ from .views import update_user_by_id
 from .views import get_all_user
 from .views import login
 from .views import forgot_password
+# from .views import mail
 
 
 
@@ -36,15 +37,16 @@ urlpatterns = [
     
     path('admin/', admin.site.urls),
     path('',include(router.urls)),
-    path('getalldatabyidtodo/<int:user_id>/', get_user_by_id, name='get_user_by_id'),
-    path('getalldatatodo/', get_all_user, name='get_all_user'),
-    path('deletealldatabyidtodo/<int:user_id>/', delete_user_by_id, name='delete_user_by_id'),
-    path('updatealldatabyidtodo/<int:user_id>/', update_user_by_id, name='update_user_by_id'),
-    path('deletealldatabyidtodo/<int:user_id>/', views.delete_user_by_id, name='delete_user_by_id'),
-    path('login/', login, name='login'),
-    path('forgotpassword/', forgot_password, name='forgot_password'),
+    path('getalldatatodo/<int:user_id>',get_user_by_id, name='get_user_by_id'),
+    path('getalldatatodo/',get_all_user, name='get_all_user'),
+    path('deletealldatabyidtodo/<int:user_id>/',delete_user_by_id, name='delete_user_by_id'),
+    path('updatealldatabyidtodo/<int:user_id>/',update_user_by_id, name='update_user_by_id'),
+    path('deletealldatabyidtodo/<int:user_id>/',delete_user_by_id, name='delete_user_by_id'),
+    path('login/',login, name='login'),
+    path('forgotpassword/',forgot_password, name='forgot_password'),
+    # path('mail',mail,name='mail'),
+
 ]
-
-
+  
 
 

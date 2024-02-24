@@ -6,9 +6,7 @@ import os
 
 
 def validate_picture_size(value):
-    # Max size in bytes (1MB)
-    max_size = 1024 * 1024
-
+    max_size = 1024 * 1024     # Max size in bytes (1MB)
     if value.size > max_size:
         raise ValidationError(f"Max file size is {max_size} bytes")
     
@@ -39,9 +37,7 @@ class User(models.Model):
             # Hash the password
             self.Password = make_password(self.Password)
         super().save(*args, **kwargs)
-        
-
-        
+             
     class Meta:
         db_table = 'crm'
 
